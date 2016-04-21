@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>List room</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="/public/css/style.css" rel="stylesheet" type="text/css"/>
+    </head>
+    <body class="room-list">
+        <section class="wapper-content">
+            <header>
+                <h3>Danh sách phòng</h3>
+            </header>
+            <div>
+                <button id="create-room">Tạo phòng</button>
+            </div>
+            <main id="rooms"></main>
+            <footer></footer>
+        </section>
+        
+        <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+        <script src="/socket.io/socket.io.js"></script>
+        <script>
+            $(function () {
+                checkLogin();
+                function checkLogin(){
+                    var login = sessionStorage.getItem('login_');
+                    if (login === null) {
+                        location.href = '/';
+                    }
+                }
+                
+                var socket = io.connect();
+
+                socket.emit('get_rooms', {});
+                
+                socket.on('return_get_rooms', function(data){
+                    var rooms = data.rooms;
+                    $('#rooms').html('');
+                    for(var i=0; i<rooms.length; i++){
+                        var div = $("<div><a href='/chat#" + rooms[i] + "'>Phòng " + rooms[i] + "</a></div>");
+                        $('#rooms').append(div);
+                    }
+                });
+                
+                socket.on('return_create_room', function(data){
+                    var room = data.room;
+                    location.href = '/chat#' + room;
+                });
+                
+                $('#create-room').click(function(){
+                    socket.emit('create_room', {});
+                });
+            });
+        </script>
+    </body>
+</html>

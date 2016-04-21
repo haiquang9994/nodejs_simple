@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Chat</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="/public/css/style.css" rel="stylesheet" type="text/css"/>
+    </head>
+    <body class="chat-room">
+        <div class="chat">
+            <div class="chat-messages" id="chat-messages">
+                <!--<div class="chat-message">Name: Message</div>-->
+            </div>
+            <form id="form-message">
+                <input class="chat-textarea" autocomplete="off" id="msg" placeholder="Type your message">
+                <!--<textarea class="chat-textarea" placeholder="Type your message"></textarea>-->
+            </form>
+            <div class="chat-status">Status: <span>Idle</span></div>
+        </div>
+
+        <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+        <script src="/socket.io/socket.io.js"></script>
+        <script>
+            $(function () {
+                var state = false;
+                var socket = io.connect();
+                var formMessage = $('#form-message');
+                var messages = $('#chat-messages');
+                var room = location.hash.substring(1);
+                var login = sessionStorage.getItem('login_');
+                var info = null;
+                
+                socket.emit('join_room', {room: room, login: login});
+
+                socket.on('return_join_room', function (data) {
+                    if (data === null) {
+                        location.href = '/';
+                    } else {
+                        state = true;
+                        info = data;
+                    }
+                });
+
+                socket.on('client_connect', function (data) {
+                    var msg = $("<div class='chat-message'>" + data.name + "("+ data.id +"): <i>Connected</i></div>");
+                    messages.append(msg);
+                    $('#msg').focus();
+                    messages.scrollTop(messages[0].scrollHeight);
+                });
+
+                formMessage.submit(function (e) {
+                    e.preventDefault();
+                    if (state) {
+                        var msg = $('#msg').val();
+                        $('#msg').val('');
+                        socket.emit('send_message', {info: info, msg: msg});
+                    }
+                });
+
+                socket.on('has_connect', function (data) {
+//                    console.log(data);
+                });
+                
+                socket.on('client_leave', function(data){
+                    var msg = $("<div class='chat-message'>" + data.name + "("+ data.id +"): <i>Disconnected</i></div>");
+                    messages.append(msg);
+                    messages.scrollTop(messages[0].scrollHeight);
+                });
+
+                socket.on('new_message', function (data) {
+                    var msg = $("<div class='chat-message'>" + data.info.name + "("+ data.info.id +"): " + data.msg + "</div>");
+                    messages.append(msg);
+                    messages.scrollTop(messages[0].scrollHeight);
+                });
+            });
+        </script>
+    </body>
+</html>

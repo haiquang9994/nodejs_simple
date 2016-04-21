@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Chào mừng đến với phòng tán gẩu! ^_^</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="/public/css/style.css" rel="stylesheet" type="text/css"/>
+    </head>
+    <body class="welcome">
+        <section class="wapper-content">
+            <header>
+                <h1>Chào mừng đến với phòng tán gẩu! ^_^</h1>
+            </header>
+            <main>
+                <form class="formName" id="formName">
+                    <input id="inputName" type="text" placeholder="Tên của bạn..." autocomplete="off">
+                    <button type="submit" >Xác nhận</button>
+                </form>
+            </main>
+            <footer></footer>
+        </section>
+
+        <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+        <script src="/socket.io/socket.io.js"></script>
+        <script>
+            $(function () {
+                checkLogin();
+                function checkLogin(){
+                    var login = sessionStorage.getItem('login_');
+                    if (login !== null) {
+                        location.href = '/danh-sach-phong';
+                    }
+                }
+                
+                var socket = io.connect();
+
+                $('#formName').submit(function (e) {
+                    e.preventDefault();
+                    var inputName = $('#inputName').val();
+                    var id = Math.floor((Math.random() * 9000) +  1000);
+                    socket.id = id;
+                    if (inputName.trim() !== '') {
+                        socket.emit('submit_input_name', {name: inputName, id: id});
+                    }
+                });
+
+                socket.on('submit_success', function (data) {
+                    if (data.state) {
+                        sessionStorage.setItem('login_', data.id);
+                        location.href = '/danh-sach-phong';
+                    }
+                });
+            });
+        </script>
+    </body>
+</html>
