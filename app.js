@@ -5,11 +5,14 @@ var express = require('express'),
         port = process.env.PORT || 3000;
 
 server.listen(port);
-app.use('/public', express.static(__dirname + '/public'));
+// app.use('/public', express.static(__dirname + '/public'));
 
 var allClients = [];
 var rooms = [];
 
+app.get('/cdn/css/:path', function (req, res) {
+    res.sendFile(__dirname + '/public/css/' + req.params.path);
+});
 app.get('/', function (req, res) {
     res.sendfile(__dirname + '/view/webcome.html');
 });
