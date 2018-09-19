@@ -12,6 +12,12 @@ input{
     font: 13px Arial, sans-serif;
 }
 
+h1 {
+    font-size: 33px;
+    line-height: 1.6;
+    padding: 10px;
+}
+
 .chat{
     max-width: 800px;
     margin: auto;
